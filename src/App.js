@@ -1,6 +1,5 @@
 import React from "react";
 import CurrentLocation from "./currentLocation";
-import "./App.css";
 
 function App() {
   return (
