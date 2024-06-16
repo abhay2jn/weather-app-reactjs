@@ -36,7 +36,6 @@ function Forecast(props) {
   }, []); // Dependency array is empty so it only runs once
 
   return (
-    <>
     <div className="forecast">
       <div className="forecast-icon">
         <ReactAnimatedWeather
@@ -111,7 +110,6 @@ function Forecast(props) {
         </ul>
       </div>
     </div>
-    </>
   );
 }
 
