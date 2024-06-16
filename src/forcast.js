@@ -1,36 +1,28 @@
-import React, { useState, useEffect, Component } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import apiKeys from "./apiKeys";
 import ReactAnimatedWeather from "react-animated-weather";
 
-function Forcast(props) {
+function Forecast(props) {
   const [query, setQuery] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null); // Use null for error state initially
   const [weather, setWeather] = useState({});
 
-  const search = (city) => {
+  const search = () => {
     axios.get(
-        `${apiKeys.base}weather?q=${
-          city != "[object Object]" ? city : query
-        }&units=metric&APPID=${apiKeys.key}`
+        `${apiKeys.base}weather?q=${query}&units=metric&APPID=${apiKeys.key}`
       )
       .then((response) => {
         setWeather(response.data);
-        setQuery("");
+        setQuery(""); // Clear the query after successful fetch
+        setError(null); // Clear any previous errors
       })
-      .catch(function (error) {
-        console.log(error);
-        setWeather("");
-        setQuery("");
-        setError({ message: "Not Found", query: query });
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setWeather({}); // Clear weather object on error
+        setError({ message: "City not found", query: query }); // Set error state
       });
   };
-  function checkTime(i) {
-    if (i < 10) {
-      i = "0" + i;
-    } 
-    return i;
-  }
 
   const defaults = {
     color: "white",
@@ -39,21 +31,22 @@ function Forcast(props) {
   };
 
   useEffect(() => {
+    // Initial load with default city (Delhi)
     search("Delhi");
-  }, []);
+  }, []); // Dependency array is empty so it only runs once
 
   return (
     <div className="forecast">
       <div className="forecast-icon">
         <ReactAnimatedWeather
-          icon={props.icon}
+          icon={weather.weather ? weather.weather[0].icon : ""}
           color={defaults.color}
           size={defaults.size}
           animate={defaults.animate}
         />
       </div>
       <div className="today-weather">
-        <h3>{props.weather}</h3>
+        <h3>{weather.weather ? weather.weather[0].main : ""}</h3>
         <div className="search-box">
           <input
             type="text"
@@ -63,17 +56,16 @@ function Forcast(props) {
             value={query}
           />
           <div className="img-box">
-            {" "}
             <img
               src="https://images.avishkaar.cc/workflow/newhp/search-white.png"
+              alt="Search"
               onClick={search}
             />
           </div>
         </div>
         <ul>
-          {typeof weather.main != "undefined" ? (
+          {weather.main && (
             <div>
-              {" "}
               <li className="cityHead">
                 <p>
                   {weather.name}, {weather.sys.country}
@@ -81,6 +73,7 @@ function Forcast(props) {
                 <img
                   className="temp"
                   src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}.png`}
+                  alt={weather.weather[0].description}
                 />
               </li>
               <li>
@@ -108,9 +101,10 @@ function Forcast(props) {
                 </span>
               </li>
             </div>
-          ) : (
+          )}
+          {error && (
             <li>
-              {error.query} {error.message}
+              {error.query} - {error.message}
             </li>
           )}
         </ul>
@@ -118,4 +112,5 @@ function Forcast(props) {
     </div>
   );
 }
-export default Forcast;
+
+export default Forecast;
